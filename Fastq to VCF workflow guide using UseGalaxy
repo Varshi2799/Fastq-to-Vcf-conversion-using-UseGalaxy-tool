@@ -1,0 +1,173 @@
+#FASTQ to VCF File Conversion: A Comprehensive Guide Using UseGalaxy Utility
+
+## Objective
+
+This repository provides a detailed guide to converting **FASTQ** files to **VCF** files using the [UseGalaxy](https://usegalaxy.org) platform. It is designed for researchers, students, and bioinformaticians who want a no-code solution for variant calling from sequencing data.
+
+---
+
+## Table of Contents
+
+- [Introduction](#introduction)
+  - [What is a FASTQ file?](#what-is-a-fastq-file)
+  - [What is a VCF file?](#what-is-a-vcf-file)
+  - [What is UseGalaxy?](#what-is-usegalaxy)
+  - [Why Use UseGalaxy?](#why-use-usegalaxy)
+- [Getting Started](#getting-started)
+- [Step-by-Step Workflow](#step-by-step-workflow)
+  - [1. Upload FASTQ Files](#1-upload-fastq-files)
+  - [2. Quality Check](#2-quality-check)
+  - [3. Trim Low-Quality Reads (Optional)](#3-trim-low-quality-reads-optional)
+  - [4. Align Reads to Reference Genome](#4-align-reads-to-reference-genome)
+  - [5. Convert SAM to BAM and Sort](#5-convert-sam-to-bam-and-sort)
+  - [6. Variant Calling](#6-variant-calling)
+  - [7. Filter Variants](#7-filter-variants)
+  - [8. (Optional) Annotate Variants](#8-optional-annotate-variants)
+- [Creating a Galaxy Workflow](#creating-a-galaxy-workflow)
+- [Conclusion](#conclusion)
+
+---
+
+## Introduction
+
+### What is a FASTQ file?
+
+A **FASTQ** file is a standard format for storing biological sequences and their corresponding quality scores from high-throughput sequencing instruments. Each read includes:
+
+- A sequence identifier
+- A nucleotide sequence
+- A separator
+- A string of quality scores
+
+### What is a VCF file?
+
+A **VCF (Variant Call Format)** file is used to describe genetic variants (such as SNPs and indels) in a standardized format. It contains:
+
+- Meta-information lines
+- A header line
+- Data lines with information like chromosome, position, reference/alternate alleles, and genotype
+
+### What is UseGalaxy?
+
+**Galaxy** is an open-source, web-based platform that allows users to perform bioinformatics analyses via a GUI. It supports thousands of tools and workflows for genome analysis without any programming.
+
+### Why Use UseGalaxy?
+
+- No coding required
+- GUI-driven workflow building
+- Cloud-based processing
+- Easy reproducibility and sharing
+- Supported by a large bioinformatics community
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- FASTQ file(s) from your sequencing experiment
+- A registered [Galaxy](https://usegalaxy.org) account (free)
+- Stable internet connection
+
+### Recommended Tools (on Galaxy)
+
+- **FastQC** – Quality check
+- **Trimmomatic** – Read trimming
+- **BWA / Bowtie2** – Read alignment
+- **SAMtools** – File conversion/sorting
+- **FreeBayes / GATK** – Variant calling
+- **VCFtools / bcftools** – Filtering
+- **SnpEff / VEP** – Annotation (optional)
+
+---
+
+## Step-by-Step Workflow
+
+### 1. Upload FASTQ Files
+
+1. Login to [Galaxy](https://usegalaxy.org)
+2. Click **Upload Data**
+3. Drag-and-drop your `.fastq` files or upload via URL/FTP
+4. Click **Start** and wait for completion
+
+### 2. Quality Check
+
+- Tool: **FastQC**
+- Run FastQC on the uploaded FASTQ files
+- Review HTML reports for:
+  - Per-base sequence quality
+  - Adapter content
+  - GC content
+
+### 3. Trim Low-Quality Reads (Optional)
+
+- Tool: **Trimmomatic** or **Cutadapt**
+- Trim adapters and low-quality bases
+- Use parameters based on FastQC results
+
+### 4. Align Reads to Reference Genome
+
+- Tool: **BWA-MEM** or **Bowtie2**
+- Input: Cleaned FASTQ file and reference genome (e.g., hg38)
+- Output: SAM file (Sequence Alignment Map)
+
+### 5. Convert SAM to BAM and Sort
+
+- Tool: **SAMtools**
+  - Convert SAM to BAM
+  - Sort BAM
+  - Index BAM (optional but useful)
+
+### 6. Variant Calling
+
+- Tool: **FreeBayes** or **GATK HaplotypeCaller**
+- Input: Sorted BAM + reference genome
+- Output: Raw VCF file
+
+### 7. Filter Variants
+
+- Tool: **VCFtools** / **bcftools**
+- Example filters:
+  - Minimum quality (`QUAL`)
+  - Minimum depth (`DP`)
+
+### 8. (Optional) Annotate Variants
+
+- Tool: **SnpEff**, **VEP**, or **ANNOVAR**
+- Input: VCF file
+- Output: Annotated VCF or table with functional impact
+
+---
+
+## Creating a Galaxy Workflow
+
+1. Go to **Workflow > Create New Workflow**
+2. Name your workflow (e.g., `FASTQ_to_VCF_Workflow`)
+3. Add tools in sequence:
+   - FastQC → Trimmomatic → BWA → SAMtools → FreeBayes → VCFtools
+4. Connect inputs and outputs between steps
+5. Save the workflow
+6. Click **Run** to execute with your data
+
+You can also share or publish your workflow for team or public use.
+
+---
+
+## Conclusion
+
+The Galaxy platform enables users of all skill levels to perform complex bioinformatics analyses without command-line tools. This guide walks you through converting raw sequencing data (FASTQ) into valuable genetic insights (VCF) with simple, reproducible steps.
+
+For questions or help, visit the [Galaxy Help Forum](https://help.galaxyproject.org/).
+
+---
+
+## License
+
+This guide is open-source and available under the [MIT License](LICENSE).
+
+---
+
+## Author
+
+[Your Name]  
+[Your Affiliation or GitHub Profile]
