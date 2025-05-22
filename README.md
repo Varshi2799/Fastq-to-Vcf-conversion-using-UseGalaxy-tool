@@ -1,13 +1,13 @@
 # FASTQ to VCF File Conversion: A Comprehensive Guide Using UseGalaxy Utility
 
-## 🧬 Objective
+## Objective
 
 This repository provides a detailed guide for converting **FASTQ** files to **VCF** files using the [UseGalaxy](https://usegalaxy.org) platform. 
 This is a platform designed for researchers, students, and bioinformaticians, which offers a **no-code solution** for variant calling from sequencing data, making it an easy alternative utility.
 
 ---
 
-## 📚 Table of Contents
+## Table of Contents
 
 - [Introduction]
   - [What is a FASTQ file?]
@@ -27,7 +27,7 @@ This is a platform designed for researchers, students, and bioinformaticians, wh
 
 ---
 
-## 📘 Introduction
+## Introduction
 
 ### What is a FASTQ file?
 
@@ -57,16 +57,16 @@ A **VCF (Variant Call Format)** file stores genetic variants like SNPs and indel
 
 ### Why Use UseGalaxy?
 
-- 🔧 No coding is required  
-- 🖱️ User-friendly Graphical Interface
-- ☁️ Cloud-based execution
-- 🌍 Active community support
+- No coding is required  
+- User-friendly Graphical Interface
+- Cloud-based execution
+- Active community support
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### Prerequisites
+### Requirements:
 
 - `.fastq` files from your sequencing experiments/available sources such as 
 - A [Galaxy account](https://usegalaxy.org)
@@ -87,7 +87,7 @@ A **VCF (Variant Call Format)** file stores genetic variants like SNPs and indel
 
 ---
 
-## 🔄 Step-by-Step guide on how to create a Workflow
+## Step-by-Step guide on how to create a Workflow
 
 What is a workflow? A workflow is a step-by-step sequence of tools or processes that you follow to analyze biological data — often automated and repeatable. It defines what tools are used, in what order, and how data flows from one step to the next.
 
@@ -98,22 +98,38 @@ What is a workflow? A workflow is a step-by-step sequence of tools or processes 
 3. Upload via drag-and-drop or paste URL
 4. Wait for the files to finish processing
 
-Sample data can be used to run the below workflow using the steps mentioned in the link provided below:
+Sample data can be used to run the below workflow by extracting the files from the link below:
 https://docs.nvidia.com/clara/parabricks/latest/tutorials/gettingthesampledata.html#getting-the-sample-data
 
+Quick tutorial
+---
+
+Paste the following URL in the **Paste/fetch** data tab:
+https://s3.amazonaws.com/parabricks.sample/parabricks_sample.tar.gz
+
+Once the file has been fetched, it needs to be unzipped (Unzip option present in Usegalaxy.au)
+
+The reference FASTA file and the paired end reads (FASTQ1 and FASTQ2) are to be used for further analysis
 
 ### 2. Quality Check
 
-- Use **FastQC**
+- Tool to be used: **FastQC**
 - Analyze:
   - Per-base quality
   - Adapter content
   - GC content
+Each module provides a graphical representation of the data, accompanied by a color-coded flag indicating the quality:
+Green (PASS): No significant issues detected.
+Yellow (WARN): Potential issues that may require attention.
+Red (FAIL): Serious problems that need to be addressed before proceeding 
 
 ### 3. Trim Low-Quality Reads (Optional)
 
-- Tools: **Trimmomatic** or **Cutadapt**
+- Tool to be used: **Trimmomatic; TrimGalore!**
 - Remove adapters and low-quality bases
+Trimmomatic operates by applying a series of user-defined steps to each read or read pair in a specified order. This pipeline-based architecture allows for efficient and customizable preprocessing of sequencing data. It supports both single-end and paired-end data formats and can handle compressed files
+
+Trim Galore! is a bioinformatics tool designed to automate the process of quality and adapter trimming for high-throughput sequencing data, particularly focusing on bisulfite sequencing applications like Reduced Representation Bisulfite Sequencing (RRBS).
 
 ### 4. Align Reads to Reference Genome
 
@@ -121,13 +137,14 @@ https://docs.nvidia.com/clara/parabricks/latest/tutorials/gettingthesampledata.h
 - Input: Clean FASTQ + reference genome
 - Output: `.sam` file
 - Aligns reads to a reference genome (e.g., hg38 which is an in built reference or reference fasta provided)
+BWA-MEM2 is an advanced read alignment tool designed to efficiently map high-throughput sequencing reads to a reference genome. It is the successor to the widely used BWA-MEM algorithm and offers significant performance improvements.
+The reference genome used can either built in or a specific reference FASTA can be provided.
 
 ### 5. Convert SAM to BAM and Sort
 
 - Use **SAMtools** to:
-  - Convert SAM to BAM
-  - Sort BAM
-  - (Optional) Index BAM
+  - Sort and indexing
+SortSam organizes the records in a SAM or BAM file based on a specified sort order
 
 ### 6. Mark Duplicates - Picard
 
@@ -135,25 +152,30 @@ https://docs.nvidia.com/clara/parabricks/latest/tutorials/gettingthesampledata.h
 - Identify and flag PCR duplicates to avoid false variants
     Input: BAM
     Output: Deduplicated BAM
-    Purpose: .
+The tool scans aligned reads to identify duplicates—reads that originate from the same DNA fragment. This process helps in distinguishing true biological variants from artifacts introduced during sample preparation.
 
 ### 6. Variant Calling
 
-- Tools: **FreeBayes** or **GATK HaplotypeCaller**
+- Tools: **FreeBayes** or **GATK4 Mutect2**
 - Input: Sorted BAM + reference
 - Output: Raw `.vcf` file
 
-### 7. Filter Variants
+FreeBayes is an open-source, haplotype-based variant caller designed to detect small genetic polymorphisms—such as single-nucleotide polymorphisms (SNPs), insertions and deletions (indels), multi-nucleotide polymorphisms (MNPs), and complex events—by analyzing short-read sequencing data aligned to a reference genome.
 
-- Tools: **VCFtools** or **bcftools**
-- Apply filters such as:
-  - Minimum `QUAL`
-  - Minimum read `DP`
+GATK4 Mutect2 is a specialized tool for detecting somatic mutations—such as single nucleotide variants (SNVs) and small insertions and deletions (indels)—in tumor DNA samples. It employs a haplotype-based approach to accurately identify variants, even in complex regions of the genome.
 
-### 8. (Optional) Annotate Variants
+---
 
-- Tools: **SnpEff**, **VEP**, or **ANNOVAR**
-- Output: Annotated `.vcf` or summary table
+## Creating a Galaxy Workflow
+
+1. Go to **Workflow > Create New Workflow**
+2. Name your workflow (e.g., `FASTQ_to_VCF_Workflow`)
+3. Add tools:
+   - FastQC → Trimmomatic → BWA → SAMtools → GATK4 Mutect2
+4. Link input/output ports
+5. Save and **Run** with your data
+6. Analyse the outputs
+7. **Share or Publish** your workflow
 
 **Table 2** : Summary table of Tools used in the workflow and the descripton
 
@@ -166,22 +188,9 @@ https://docs.nvidia.com/clara/parabricks/latest/tutorials/gettingthesampledata.h
 | 5 | **SortSam** | Sorts SAM/BAM files by coordinate or name using Picard; prepares files for downstream analysis |
 | 6 | **GATK4 Mutect2** | Calls somatic variants in tumor or tumor-normal pairs using a Bayesian model; optimized for cancer mutation detection |
 
----
-
-## 🧩 Creating a Galaxy Workflow
-
-1. Go to **Workflow > Create New Workflow**
-2. Name your workflow (e.g., `FASTQ_to_VCF_Workflow`)
-3. Add tools:
-   - FastQC → Trimmomatic → BWA → SAMtools → FreeBayes → VCFtools
-4. Link input/output ports
-5. Save and **Run** with your data
-6. (Optional) **Share or Publish** your workflow
-
----
-
-## ✅ Conclusion
+The below workflow can be used as a reference to build your very own: https://usegalaxy.org/u/varshitha/w/fastq-2-vcf-workflow 
+##DISCLAIMER: The provided workflow is just a reference and is not to be used for directly performing FASTQ-> VCF conversion
+ 
+## Conclusion
 
 With UseGalaxy, you can build powerful, **no-code pipelines** for processing sequencing data into annotated genetic variants. This guide walks you through a beginner-friendly process from **FASTQ to VCF** using trusted tools and reproducible workflows.
-
-Need help? Visit the [Galaxy Help Forum](https://help.galaxyproject.org/)
